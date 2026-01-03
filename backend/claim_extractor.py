@@ -24,9 +24,9 @@ EXTRACT COMPLETE CLAIMS, NOT INDIVIDUAL ENTITIES!
 
 Examples of GOOD claims:
 ✓ "Albert Einstein discovered penicillin in 1928" (complete action with subject + verb + object + time)
-✓ "Elon Musk founded Google in 1998" (complete statement about who did what when)
+✓ "The moon is made of green cheese" (False but verifiable claim)
+✓ "Humans can breathe underwater" (False but verifiable claim)
 ✓ "The Eiffel Tower was completed in 1889" (complete statement about an event)
-✓ "Python was created by Guido van Rossum" (complete attribution statement)
 
 Examples of BAD claims (DO NOT extract these):
 ✗ "Albert Einstein" (just a name, not a claim)
@@ -45,8 +45,8 @@ RULES:
 TEXT TO ANALYZE:
 {text}
 
-Return a JSON array with objects containing: "claim", "start_char", "end_char"
-The claim text should be the COMPLETE factual statement from the original text.
+Return a JSON array with objects containing ONLY the key: "claim".
+Example: [{{"claim": "The sky is blue"}}, {{"claim": "Water is wet"}}]
 
 Return ONLY valid JSON array, no other text."""
 
@@ -91,19 +91,16 @@ async def extract_claims(text: str) -> List[Dict]:
         validated_claims = []
         for claim in claims[:5]:  # Max 5 claims
             claim_text = claim.get("claim", "")
-            start = claim.get("start_char", 0)
-            end = claim.get("end_char", 0)
             
-            # Try to find the claim in the text if positions don't match
-            if text[start:end] != claim_text:
-                # Search for the claim in the text
-                found_pos = text.find(claim_text)
-                if found_pos != -1:
-                    start = found_pos
-                    end = found_pos + len(claim_text)
-                else:
-                    # Skip claims we can't locate
-                    continue
+            # Search for the claim in the text to find indices
+            # We do this in Python now instead of asking the LLM
+            start = -1
+            end = -1
+            
+            found_pos = text.find(claim_text)
+            if found_pos != -1:
+                start = found_pos
+                end = found_pos + len(claim_text)
             
             validated_claims.append({
                 "claim": claim_text,

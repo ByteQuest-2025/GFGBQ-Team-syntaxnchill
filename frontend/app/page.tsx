@@ -37,9 +37,27 @@ interface CitationResult {
 type VerificationMode = "claims" | "citations";
 
 const DEMO_FACTS = {
-  true: "The capital of France is Paris. It is known for the Eiffel Tower, which was completed in 1889.",
-  fake: "The moon is made of green cheese and was discovered by Buzz Aldrin in 1969 during the Apollo 11 mission.",
-  mixed: "Water boils at 100 degrees Celsius at sea level. However, in the city of Atlantis, it freezes when heated.",
+  true: [
+    "The capital of France is Paris. It is known for the Eiffel Tower, which was completed in 1889.",
+    "Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods with the help of chlorophyll.",
+    "The Great Wall of China is a series of fortifications that were built across the historical northern borders of ancient Chinese states.",
+    "Water is composed of two hydrogen atoms and one oxygen atom.",
+    "The speed of light in a vacuum is approximately 299,792,458 meters per second."
+  ],
+  fake: [
+    "The moon is made of green cheese and was discovered by Buzz Aldrin in 1969 during the Apollo 11 mission.",
+    "Albert Einstein invented the iPhone in 1955 as a secret project for the US military.",
+    "The Great Barrier Reef is located off the coast of California and is primarily made of plastic waste.",
+    "Humans can breathe underwater without equipment if they train their lungs for 3 weeks.",
+    "The internet was created by ancient Egyptians using fiber optic cables made from papyrus."
+  ],
+  mixed: [
+    "Water boils at 100 degrees Celsius at sea level. However, in the city of Atlantis, it freezes when heated.",
+    "Mount Everest is the highest mountain on Earth. It was first climbed by Sir Edmund Hillary and Tenzing Norgay in 1853.",
+    "Honey never spoils. Archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still edible. It was invented by the ancient Romans.",
+    "The human heart pumps blood throughout the body. It is located in the right side of the chest and stops beating when you sneeze.",
+    "Leonardo da Vinci painted the Mona Lisa. He also invented the first functional helicopter in 1505 which he used to commute to work."
+  ],
 };
 
 const DEMO_CITATIONS = {
@@ -127,7 +145,9 @@ export default function HallucinationDetector() {
   };
 
   const fillDemo = (type: keyof typeof DEMO_FACTS) => {
-    setInputText(DEMO_FACTS[type]);
+    const options = DEMO_FACTS[type];
+    const randomOption = options[Math.floor(Math.random() * options.length)];
+    setInputText(randomOption);
     setError(null);
     setResults(null);
     setCitationResults(null);
@@ -215,7 +235,7 @@ export default function HallucinationDetector() {
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex flex-wrap gap-2">
-              {mode === "claims" ? (
+              {mode === "claims" && (
                 <>
                   <button onClick={() => fillDemo("true")} className="px-4 py-2 text-sm font-medium rounded-full bg-slate-900/50 border border-slate-800 hover:bg-slate-800 hover:text-white text-slate-300 transition-colors">
                     Try True Fact
@@ -225,18 +245,6 @@ export default function HallucinationDetector() {
                   </button>
                   <button onClick={() => fillDemo("mixed")} className="px-4 py-2 text-sm font-medium rounded-full bg-slate-900/50 border border-slate-800 hover:bg-slate-800 hover:text-white text-slate-300 transition-colors">
                     Try Mixed Content
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button onClick={() => fillCitationDemo("correct")} className="px-4 py-2 text-sm font-medium rounded-full bg-slate-900/50 border border-green-800/50 hover:bg-green-900/30 hover:text-white text-slate-300 transition-colors">
-                    Correct Citation
-                  </button>
-                  <button onClick={() => fillCitationDemo("wrongYear")} className="px-4 py-2 text-sm font-medium rounded-full bg-slate-900/50 border border-yellow-800/50 hover:bg-yellow-900/30 hover:text-white text-slate-300 transition-colors">
-                    Wrong Year
-                  </button>
-                  <button onClick={() => fillCitationDemo("wrongVenue")} className="px-4 py-2 text-sm font-medium rounded-full bg-slate-900/50 border border-red-800/50 hover:bg-red-900/30 hover:text-white text-slate-300 transition-colors">
-                    Wrong Venue
                   </button>
                 </>
               )}
