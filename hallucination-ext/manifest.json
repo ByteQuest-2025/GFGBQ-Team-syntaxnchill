@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "AI Hallucination Detector",
+  "version": "1.0.0",
+  "description": "Detect AI hallucinations and verify claims in real-time. Select text on any website and instantly check if claims are verified, hallucinated, or unverifiable.",
+  
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI Hallucination Detector",
+    "default_icon": "icons/icon.svg"
+  },
+  
+  "icons": {
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg",
+    "128": "icons/icon.svg"
+  },
+  
+  "background": {
+    "scripts": ["background.js"],
+    "type": "module"
+  },
+  
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "hallucination-detector@syntaxnchill.com",
+      "strict_min_version": "109.0"
+    }
+  }
+}
