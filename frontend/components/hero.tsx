@@ -35,13 +35,14 @@ export function Hero() {
         <div className="mt-16 relative group">
           <div className="relative rounded-xl border border-border/50 bg-card/50 backdrop-blur-xl overflow-hidden shadow-2xl max-w-4xl mx-auto">
             <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-b border-border/50">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+              <div className="flex gap-1.5">
+                <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
+                <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
+                <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium absolute left-1/2 -translate-x-1/2">
                 <Search className="h-3.5 w-3.5" />
                 Verification Report: Claim #402
-              </div>
-              <div className="flex gap-1.5">
-                <div className="h-2.5 w-2.5 rounded-full bg-border" />
-                <div className="h-2.5 w-2.5 rounded-full bg-border" />
               </div>
             </div>
             <div className="p-8 space-y-6">
