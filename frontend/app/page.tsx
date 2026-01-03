@@ -1,223 +1,315 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Check, AlertCircle, HelpCircle, Loader2, ExternalLink, Info, X } from "lucide-react";
+
+// Utility for conditional classes
+function cn(...classes: (string | undefined | null | false)[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 interface Source {
   title: string;
   url: string;
-  snippet: string;
+  snippet?: string;
 }
 
 interface ClaimResult {
   claim: string;
-  start_char: number;
-  end_char: number;
   status: "VERIFIED" | "HALLUCINATED" | "UNVERIFIABLE";
   reason: string;
   sources: Source[];
 }
 
-interface VerifyResponse {
-  results: ClaimResult[];
-}
+const DEMO_FACTS = {
+  true: "The capital of France is Paris. It is known for the Eiffel Tower, which was completed in 1889.",
+  fake: "The moon is made of green cheese and was discovered by Buzz Aldrin in 1969 during the Apollo 11 mission.",
+  mixed: "Water boils at 100 degrees Celsius at sea level. However, in the city of Atlantis, it freezes when heated.",
+};
 
-const DEMO_EXAMPLES = [
-  "Elon Musk founded Google in 1998 and later acquired Twitter.",
-  "The Eiffel Tower is located in Paris, France and was completed in 1889.",
-  "Albert Einstein discovered penicillin in 1928 while working at NASA.",
-  "Python was created by Guido van Rossum and first released in 1991.",
+const HALLUCINATION_FACTS = [
+  {
+    type: "damage",
+    text: "AI hallucinations can lead to significant financial losses for businesses relying on automated decision-making.",
+  },
+  {
+    type: "benefit",
+    text: "Verifying AI output ensures the integrity of research and prevents the spread of scientific misinformation.",
+  },
+  {
+    type: "damage",
+    text: "In legal contexts, hallucinated case citations have led to sanctions and damaged professional reputations.",
+  },
+  {
+    type: "benefit",
+    text: "Cross-referencing claims builds trust with users by demonstrating a commitment to factual accuracy.",
+  },
+  {
+    type: "damage",
+    text: "Medical hallucinations in AI can provide dangerous or incorrect health advice if not properly audited.",
+  },
 ];
 
-export default function Home() {
-  const [text, setText] = useState("");
-  const [results, setResults] = useState<ClaimResult[]>([]);
-  const [loading, setLoading] = useState(false);
+export default function HallucinationDetector() {
+  const [inputText, setInputText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<ClaimResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [factIndex, setFactIndex] = useState(0);
 
+  // Preserving original backend connection logic
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-  const handleVerify = async () => {
-    if (!text.trim()) return;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFactIndex((prev) => (prev + 1) % HALLUCINATION_FACTS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
-    setLoading(true);
+  const handleVerify = async () => {
+    if (!inputText.trim()) return;
+
+    setIsLoading(true);
     setError(null);
-    setResults([]);
+    setResults(null);
 
     try {
       const response = await fetch(`${API_URL}/verify`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: inputText }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const data: VerifyResponse = await response.json();
-      setResults(data.results);
+      const data = await response.json();
+      // Preserving original data structure expectation (data.results)
+      setResults(data.results || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+      console.error("API Error:", err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "VERIFIED":
-        return "bg-green-100 border-green-500 text-green-800";
-      case "HALLUCINATED":
-        return "bg-red-100 border-red-500 text-red-800";
-      case "UNVERIFIABLE":
-        return "bg-yellow-100 border-yellow-500 text-yellow-800";
-      default:
-        return "bg-gray-100 border-gray-500 text-gray-800";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "VERIFIED":
-        return "✓";
-      case "HALLUCINATED":
-        return "✗";
-      case "UNVERIFIABLE":
-        return "?";
-      default:
-        return "•";
-    }
+  const fillDemo = (type: keyof typeof DEMO_FACTS) => {
+    setInputText(DEMO_FACTS[type]);
+    setError(null);
+    setResults(null);
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+    <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 flex flex-col font-sans">
+      {/* Decorative Gradient Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[25%] -left-[10%] w-[70%] h-[70%] bg-blue-600/10 blur-[120px] rounded-full opacity-50" />
+      </div>
+
+      <div className="relative flex-1 max-w-4xl mx-auto px-6 py-20 space-y-12">
+        {/* Header Section */}
+        <header className="text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-1000">
+          <div className="inline-block px-3 py-1 text-xs font-medium tracking-wider uppercase bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/20 mb-2">
+            AI Safety & Integrity
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-balance bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
             AI Hallucination Detector
           </h1>
-          <p className="text-gray-400">
-            Paste text below to verify factual claims against real sources
+          <p className="text-lg text-slate-400 max-w-2xl mx-auto text-balance">
+            Instantly verify claims and detect hallucinations in AI-generated content using real-world sources.
           </p>
-        </div>
+        </header>
 
         {/* Input Section */}
-        <div className="bg-gray-800 rounded-lg p-6 mb-6 shadow-xl">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Paste text containing claims to verify..."
-            className="w-full h-40 bg-gray-700 text-white rounded-lg p-4 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <div className="flex flex-wrap gap-2 mt-4">
+        <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+          <div className="relative group">
+            <textarea
+              placeholder="Paste the text you want to verify here..."
+              className="w-full min-h-[240px] p-6 text-lg bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl hover:border-blue-500/50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all resize-none shadow-2xl outline-none placeholder:text-slate-600"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+            />
+            <div className="absolute bottom-4 right-4 flex gap-2">
+              <button
+                onClick={() => setInputText("")}
+                className="text-slate-500 hover:text-slate-300 text-sm font-medium px-3 py-1 rounded-md hover:bg-slate-800 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => fillDemo("true")} className="px-4 py-2 text-sm font-medium rounded-full bg-slate-900/50 border border-slate-800 hover:bg-slate-800 hover:text-white text-slate-300 transition-colors">
+                Try True Fact
+              </button>
+              <button onClick={() => fillDemo("fake")} className="px-4 py-2 text-sm font-medium rounded-full bg-slate-900/50 border border-slate-800 hover:bg-slate-800 hover:text-white text-slate-300 transition-colors">
+                Try Fake Fact
+              </button>
+              <button onClick={() => fillDemo("mixed")} className="px-4 py-2 text-sm font-medium rounded-full bg-slate-900/50 border border-slate-800 hover:bg-slate-800 hover:text-white text-slate-300 transition-colors">
+                Try Mixed Content
+              </button>
+            </div>
+
             <button
               onClick={handleVerify}
-              disabled={loading || !text.trim()}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
+              disabled={isLoading || !inputText.trim()}
+              className="w-full sm:w-auto px-8 py-4 text-lg font-semibold bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 rounded-lg shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all flex items-center justify-center gap-2"
             >
-              {loading ? "Verifying..." : "Verify Now"}
-            </button>
-            <button
-              onClick={() => {
-                setText("");
-                setResults([]);
-                setError(null);
-              }}
-              className="px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold transition-colors"
-            >
-              Clear
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                "Verify Accuracy"
+              )}
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Demo Examples */}
-        <div className="mb-6">
-          <p className="text-gray-400 text-sm mb-2">Try an example:</p>
-          <div className="flex flex-wrap gap-2">
-            {DEMO_EXAMPLES.map((example, index) => (
-              <button
-                key={index}
-                onClick={() => setText(example)}
-                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm text-gray-300 transition-colors"
-              >
-                Example {index + 1}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Error Display */}
+        {/* Error Message */}
         {error && (
-          <div className="bg-red-900/50 border border-red-500 rounded-lg p-4 mb-6">
-            <p className="text-red-300">Error: {error}</p>
-          </div>
-        )}
-
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-400">Analyzing claims...</p>
+          <div className="p-4 rounded-lg bg-red-950/30 border border-red-900/50 text-red-400 text-center animate-in zoom-in-95">
+            {error}
           </div>
         )}
 
         {/* Results Section */}
-        {results.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold mb-4">
-              Results ({results.length} claim{results.length !== 1 ? "s" : ""} found)
-            </h2>
-            {results.map((result, index) => (
-              <div
-                key={index}
-                className={`border-l-4 rounded-lg p-4 ${getStatusColor(result.status)}`}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">{getStatusIcon(result.status)}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold uppercase text-sm">
-                        {result.status}
-                      </span>
-                    </div>
-                    <p className="font-medium mb-2">&quot;{result.claim}&quot;</p>
-                    <p className="text-sm opacity-80 mb-3">{result.reason}</p>
+        {results && (
+          <section className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <h2 className="text-2xl font-bold text-white">Analysis Results</h2>
+              <p className="text-sm text-slate-400">Found {results.length} verifiable claims</p>
+            </div>
 
-                    {/* Sources */}
-                    {result.sources.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-xs font-semibold mb-1">Sources:</p>
-                        <ul className="space-y-1">
-                          {result.sources.map((source, sIndex) => (
-                            <li key={sIndex} className="text-xs">
-                              <a
-                                href={source.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="underline hover:no-underline"
-                              >
-                                {source.title}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
+            <div className="grid gap-6">
+              {results.map((claim, idx) => (
+                <ClaimCard key={idx} result={claim} />
+              ))}
+            </div>
+
+            {results.length === 0 && (
+              <div className="text-center py-12 text-slate-500 bg-slate-900/30 rounded-xl border border-dashed border-slate-800">
+                No verifiable claims found in the provided text.
+              </div>
+            )}
+          </section>
+        )}
+      </div>
+
+      <footer className="relative mt-auto border-t border-slate-800/40 bg-slate-900/20 backdrop-blur-md py-8 px-6 overflow-hidden">
+        <div className="max-w-4xl mx-auto flex flex-col items-center justify-center text-center space-y-4">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-blue-400/70">
+            <Info className="h-4 w-4" />
+            AI Integrity Insights
+          </div>
+          <div className="h-16 flex items-center justify-center relative w-full">
+            {HALLUCINATION_FACTS.map((fact, idx) => (
+              <div
+                key={idx}
+                className={cn(
+                  "absolute inset-0 flex items-center justify-center transition-all duration-1000 transform",
+                  factIndex === idx
+                    ? "opacity-100 translate-y-0 scale-100"
+                    : "opacity-0 translate-y-4 scale-95 pointer-events-none",
+                )}
+              >
+                <p
+                  className={cn(
+                    "text-base md:text-lg font-medium leading-relaxed max-w-2xl px-4",
+                    fact.type === "damage" ? "text-red-400/90" : "text-green-400/90",
+                  )}
+                >
+                  {fact.text}
+                </p>
               </div>
             ))}
           </div>
-        )}
-
-        {/* Footer */}
-        <footer className="text-center text-gray-500 text-sm mt-12">
-          <p>Built for 24-Hour Hackathon | Team syntaxnchill</p>
-        </footer>
-      </div>
+          <div className="flex gap-1.5 mt-2">
+            {HALLUCINATION_FACTS.map((_, idx) => (
+              <div
+                key={idx}
+                className={cn(
+                  "h-1.5 transition-all duration-500 rounded-full",
+                  factIndex === idx ? "w-6 bg-blue-500" : "w-1.5 bg-slate-800 hover:bg-slate-700",
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      </footer>
     </main>
+  );
+}
+
+function ClaimCard({ result }: { result: ClaimResult }) {
+  const statusConfig = {
+    VERIFIED: {
+      color: "border-green-500/30 bg-green-500/5",
+      icon: <Check className="h-5 w-5 text-green-500" />,
+      label: "Verified",
+      labelColor: "text-green-500",
+    },
+    HALLUCINATED: {
+      color: "border-red-500/30 bg-red-500/5",
+      icon: <AlertCircle className="h-5 w-5 text-red-500" />,
+      label: "Hallucination Detected",
+      labelColor: "text-red-500",
+    },
+    UNVERIFIABLE: {
+      color: "border-yellow-500/30 bg-yellow-500/5",
+      icon: <HelpCircle className="h-5 w-5 text-yellow-500" />,
+      label: "Unverifiable",
+      labelColor: "text-yellow-500",
+    },
+  };
+
+  const config = statusConfig[result.status] || statusConfig.UNVERIFIABLE;
+
+  return (
+    <div className={cn("overflow-hidden border-l-4 rounded-r-xl border border-slate-800 transition-all hover:translate-x-1 duration-300", config.color)}>
+      <div className="p-6 pb-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <div className={cn("flex items-center gap-2 text-sm font-bold uppercase tracking-wider", config.labelColor)}>
+              {config.icon}
+              {config.label}
+            </div>
+            <h3 className="text-xl font-semibold leading-tight text-slate-100">{result.claim}</h3>
+          </div>
+        </div>
+      </div>
+      <div className="p-6 pt-0 space-y-4">
+        <div className="p-3 rounded bg-slate-950/50 text-slate-300 text-sm leading-relaxed border border-slate-800/50">
+          <span className="font-bold block mb-1 text-slate-400">Reasoning:</span>
+          {result.reason}
+        </div>
+
+        {result.sources.length > 0 && (
+          <div className="space-y-2">
+            <span className="text-xs font-bold uppercase text-slate-500 tracking-widest">
+              Supporting Sources
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {result.sources.map((source, sIdx) => (
+                <a
+                  key={sIdx}
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-md border border-slate-800 transition-colors group"
+                >
+                  {source.title}
+                  <ExternalLink className="h-3 w-3 opacity-50 group-hover:opacity-100" />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
