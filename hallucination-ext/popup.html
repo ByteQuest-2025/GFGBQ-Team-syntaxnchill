@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Hallucination Detector</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🔍 Hallucination Detector</h1>
+      <p class="subtitle">Verify claims instantly</p>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-section">
+      <label for="text-input">Paste or select text:</label>
+      <textarea 
+        id="text-input" 
+        placeholder="Text will auto-populate from your selection..."
+        rows="4"
+      ></textarea>
+    </div>
+
+    <!-- Action Button -->
+    <button id="verify-btn" class="verify-button">
+      <span id="btn-text">Verify Claims</span>
+      <span id="spinner" class="spinner hidden"></span>
+    </button>
+
+    <!-- Results Area -->
+    <div id="results-container" class="results-container hidden">
+      <div id="trust-meter" class="trust-meter">
+        <div class="trust-label">
+          <span>Text Trustworthiness</span>
+          <span id="trust-score" class="trust-score">—</span>
+        </div>
+        <div class="trust-bar">
+          <div id="trust-fill" class="trust-fill"></div>
+        </div>
+        <div class="trust-stats">
+          <div class="stat">
+            <span class="stat-value" id="verified-count">0</span>
+            <span class="stat-label">Verified</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="hallucinated-count">0</span>
+            <span class="stat-label">Hallucinated</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="unverifiable-count">0</span>
+            <span class="stat-label">Unclear</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Individual Claims -->
+      <div id="claims-list" class="claims-list"></div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-container" class="error-container hidden">
+      <p id="error-text"></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Backend: <span id="api-status" class="status-indicator">Checking...</span></p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
