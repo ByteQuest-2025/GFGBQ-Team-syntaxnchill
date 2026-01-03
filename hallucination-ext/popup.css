@@ -40,6 +40,16 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.header-icon {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 2px 8px rgba(96, 165, 250, 0.4));
 }
 
 .header .subtitle {
