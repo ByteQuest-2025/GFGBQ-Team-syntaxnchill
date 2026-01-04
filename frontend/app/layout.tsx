@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "AI Hallucination Detector",
   description: "Detect hallucinations and verify claims in real-time",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
