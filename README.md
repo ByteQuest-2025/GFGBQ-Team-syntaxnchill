@@ -5,13 +5,13 @@
 > **Team Members:** Mitul Sheth and Priyanshu Makwana
 
 **Live Site:** [www.unhallucinate-ai.netlify.app](https://www.unhallucinate-ai.netlify.app)  
-**Demo Video:** [Link to Demo Video]  
+**Demo Video:** [[Link to Video](https://drive.google.com/file/d/1-wZ4_u-LPjIRVCrxAyXcfmJFvpWC4O0L/view?usp=sharing)]  
 **Presentation:** [[Link to PPT](https://drive.google.com/file/d/1-wZ4_u-LPjIRVCrxAyXcfmJFvpWC4O0L/view?usp=sharing)]
 
 ## 📸 Screenshots
 
-![Screenshot 1](.\Assets\WebApp.png)
-![Screenshot 2](.\Assets\Extension.png)
+![Screenshot 1](Assets/WebApp.png)
+![Screenshot 2](Assets/Extension.png)
 
 ## 📖 Overview
 
