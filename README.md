@@ -10,8 +10,8 @@
 
 ## 📸 Screenshots
 
-![Screenshot 1](Assets/WebApp.png)
-![Screenshot 2](Assets/Extension.png)
+<img src="Assets/WebApp.png" alt="Screenshot 1" width="600"/>
+<img src="Assets/Extension.png" alt="Screenshot 2" width="600"/>
 
 ## 📖 Overview
 
