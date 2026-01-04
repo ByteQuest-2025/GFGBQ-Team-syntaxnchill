@@ -4,6 +4,15 @@
 > **Team Name:** SyntaxNChill  
 > **Team Members:** Mitul Sheth and Priyanshu Makwana
 
+**Live Site:** [www.unhallucinate-ai.netlify.app](https://www.unhallucinate-ai.netlify.app)  
+**Demo Video:** [Link to Demo Video]  
+**Presentation:** [Link to PPT]
+
+## 📸 Screenshots
+
+![Screenshot 1](Assets\WebApp.png)
+![Screenshot 2](Assets\Extension.png)
+
 ## 📖 Overview
 
 This project is a robust system designed to detect AI hallucinations and verify citations in generated text. As Large Language Models (LLMs) become more prevalent, ensuring the factual accuracy of their output is critical. Our solution analyzes text to extract factual claims and citations, cross-references them with real-time web search results, and provides a verification status (Verified, Hallucinated, or Unverifiable) along with credible sources.
