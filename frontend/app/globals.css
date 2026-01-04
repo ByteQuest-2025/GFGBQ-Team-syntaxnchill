@@ -81,6 +81,22 @@
   }
 }
 
+/* Hide default scrollbar */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* For IE and Edge */
+body {
+  -ms-overflow-style: none;
+}
+
 /* Custom Grid Utility matching professional aesthetic */
 .grid-lines {
   /* Updated grid lines to match new theme */

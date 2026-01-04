@@ -17,6 +17,7 @@ export default function HallucinationDetector() {
   const [error, setError] = useState<string | null>(null);
   const [factIndex, setFactIndex] = useState(0);
   const [mode, setMode] = useState<VerificationMode>("claims");
+  const [scrollProgress, setScrollProgress] = useState(0);
   const MAX_CHAR_LIMIT = 200;
 
   // Preserving original backend connection logic
@@ -27,6 +28,17 @@ export default function HallucinationDetector() {
       setFactIndex((prev) => (prev + 1) % HALLUCINATION_FACTS.length);
     }, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const progress = (window.scrollY / totalHeight) * 100;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleVerify = async () => {
@@ -86,7 +98,15 @@ export default function HallucinationDetector() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 flex flex-col font-sans">
+    <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 flex flex-col font-sans overflow-x-hidden">
+      {/* Scroll Progress Indicator */}
+      <div className="fixed top-0 right-0 w-1 h-full bg-slate-800/30 z-50">
+        <div 
+          className="w-full bg-gradient-to-b from-blue-500 via-purple-500 to-blue-600 transition-all duration-300 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+          style={{ height: `${scrollProgress}%` }}
+        />
+      </div>
+
       {/* Home Button */}
       <div className="absolute top-6 left-6 z-50">
         <Link href="/" className="inline-flex items-center justify-center p-2 rounded-lg bg-slate-900/50 border border-slate-800 hover:bg-slate-800 transition-colors">
