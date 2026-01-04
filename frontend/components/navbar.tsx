@@ -8,7 +8,7 @@ export function Navbar() {
       <div className="container flex h-16 items-center px-4 md:px-8 relative">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold tracking-tight">Team SyntaxNChill</span>
+          <span className="text-xl font-bold tracking-tight"></span>
         </div>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground absolute left-1/2 -translate-x-1/2">
           <Link href="/verify" className="transition-colors hover:text-primary">

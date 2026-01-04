@@ -64,6 +64,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  position: relative;
+}
+
+.char-counter {
+  font-size: 11px;
+  color: rgba(224, 231, 255, 0.6);
+  text-align: right;
+  margin-top: -6px;
 }
 
 /* Mode Toggle */

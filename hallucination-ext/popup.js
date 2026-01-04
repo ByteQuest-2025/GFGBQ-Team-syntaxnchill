@@ -1,11 +1,13 @@
 // Configuration - Your Render.io backend URL
 const BACKEND_URL = 'https://gfgbq-team-syntaxnchill.onrender.com';
+const MAX_CHAR_LIMIT = 200;
 
 // Mode state
 let currentMode = 'fact'; // 'fact' or 'citation'
 
 // Get DOM elements
 const textInput = document.getElementById('text-input');
+const charCount = document.getElementById('char-count');
 const verifyBtn = document.getElementById('verify-btn');
 const factCheckBtn = document.getElementById('fact-check-mode');
 const citationCheckBtn = document.getElementById('citation-check-mode');
@@ -19,6 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check backend status
   await checkBackendStatus();
   
+  // Update character count on initial load
+  updateCharCount();
+  
   // Try to get selected text from active tab
   try {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
@@ -31,7 +36,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       
       if (results && results[0] && results[0].result) {
-        textInput.value = results[0].result;
+        const selectedText = results[0].result;
+        // Trim to 200 characters if longer
+        textInput.value = selectedText.substring(0, MAX_CHAR_LIMIT);
+        updateCharCount();
       }
     }
   } catch (error) {
@@ -57,6 +65,46 @@ function getSelectedTextFromPage() {
   return window.getSelection().toString();
 }
 
+// Update character count
+function updateCharCount() {
+  const count = textInput.value.length;
+  charCount.textContent = count;
+  if (count > MAX_CHAR_LIMIT) {
+    charCount.style.color = '#f87171'; // Red color when exceeding
+  } else {
+    charCount.style.color = 'rgba(224, 231, 255, 0.6)'; // Default color
+  }
+}
+
+// Character count on input
+textInput.addEventListener('input', () => {
+  updateCharCount();
+});
+
+// Handle paste event to trim text to 200 characters
+textInput.addEventListener('paste', (e) => {
+  e.preventDefault();
+  const pastedText = e.clipboardData.getData('text');
+  const trimmedText = pastedText.substring(0, MAX_CHAR_LIMIT);
+  
+  // Insert trimmed text at cursor position or replace selection
+  const start = textInput.selectionStart;
+  const end = textInput.selectionEnd;
+  const currentValue = textInput.value;
+  const beforeCursor = currentValue.substring(0, start);
+  const afterCursor = currentValue.substring(end);
+  
+  const newValue = beforeCursor + trimmedText + afterCursor;
+  // Ensure total length doesn't exceed limit
+  textInput.value = newValue.substring(0, MAX_CHAR_LIMIT);
+  
+  // Update cursor position
+  const newCursorPos = Math.min(start + trimmedText.length, MAX_CHAR_LIMIT);
+  textInput.setSelectionRange(newCursorPos, newCursorPos);
+  
+  updateCharCount();
+});
+
 // Verify button click handler
 verifyBtn.addEventListener('click', async () => {
   const text = textInput.value.trim();
@@ -69,6 +117,11 @@ verifyBtn.addEventListener('click', async () => {
   
   if (text.length < 10) {
     showError('Please provide at least 10 characters of text.');
+    return;
+  }
+
+  if (text.length > MAX_CHAR_LIMIT) {
+    showError(`Text exceeds ${MAX_CHAR_LIMIT} character limit.`);
     return;
   }
 

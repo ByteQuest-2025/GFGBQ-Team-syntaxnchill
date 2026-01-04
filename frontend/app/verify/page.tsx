@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Info } from "lucide-react";
+import { Loader2, Info, Home } from "lucide-react";
+import Link from "next/link";
 import { cn } from "../../lib/utils";
 import { ClaimResult, CitationResult, VerificationMode } from "../../types";
 import { DEMO_FACTS, DEMO_CITATIONS, HALLUCINATION_FACTS } from "../../lib/constants";
@@ -16,6 +17,7 @@ export default function HallucinationDetector() {
   const [error, setError] = useState<string | null>(null);
   const [factIndex, setFactIndex] = useState(0);
   const [mode, setMode] = useState<VerificationMode>("claims");
+  const MAX_CHAR_LIMIT = 200;
 
   // Preserving original backend connection logic
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -29,6 +31,11 @@ export default function HallucinationDetector() {
 
   const handleVerify = async () => {
     if (!inputText.trim()) return;
+
+    if (inputText.length > MAX_CHAR_LIMIT) {
+      setError(`Text exceeds ${MAX_CHAR_LIMIT} character limit`);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -80,6 +87,13 @@ export default function HallucinationDetector() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 flex flex-col font-sans">
+      {/* Home Button */}
+      <div className="absolute top-6 left-6 z-50">
+        <Link href="/" className="inline-flex items-center justify-center p-2 rounded-lg bg-slate-900/50 border border-slate-800 hover:bg-slate-800 transition-colors">
+          <Home className="h-5 w-5 text-slate-300 hover:text-white" />
+        </Link>
+      </div>
+
       {/* Decorative Gradient Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[25%] -left-[10%] w-[70%] h-[70%] bg-blue-600/10 blur-[120px] rounded-full opacity-50" />
@@ -137,8 +151,17 @@ export default function HallucinationDetector() {
               }
               className="w-full min-h-[240px] p-6 text-lg bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl hover:border-blue-500/50 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all resize-none shadow-2xl outline-none placeholder:text-slate-600"
               value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              onChange={(e) => {
+                const text = e.target.value;
+                if (text.length <= MAX_CHAR_LIMIT) {
+                  setInputText(text);
+                }
+              }}
+              maxLength={MAX_CHAR_LIMIT}
             />
+            <div className="absolute bottom-4 left-4 text-sm text-slate-500">
+              {inputText.length}/{MAX_CHAR_LIMIT}
+            </div>
             <div className="absolute bottom-4 right-4 flex gap-2">
               <button
                 onClick={() => setInputText("")}

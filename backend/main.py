@@ -84,6 +84,9 @@ async def verify_text(request: VerifyRequest):
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
     
+    if len(request.text) > 200:
+        raise HTTPException(status_code=400, detail="Text exceeds 200 character limit")
+    
     try:
         # Step 1: Extract claims (max 5)
         claims = await extract_claims(request.text)
@@ -126,6 +129,9 @@ async def verify_citations(request: VerifyRequest):
     """
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
+    
+    if len(request.text) > 200:
+        raise HTTPException(status_code=400, detail="Text exceeds 200 character limit")
     
     try:
         # Step 1: Extract citations from text
